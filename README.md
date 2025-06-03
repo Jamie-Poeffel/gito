@@ -1,7 +1,7 @@
 # Gito
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Build Status](https://img.shields.io/github/actions/workflow/status/Jamie-Poeffel/Gito/ci.yml?branch=main)](https://github.com/Jamie-Poeffel/Gito/actions)
+[![Release Version](https://img.shields.io/github/v/release/Jamie-Poeffel/Gito)](https://github.com/Jamie-Poeffel/Gito/releases)
 [![GitHub issues](https://img.shields.io/github/issues/Jamie-Poeffel/Gito)](https://github.com/Jamie-Poeffel/Gito/issues)
 ![Windows Only](https://img.shields.io/badge/Platform-Windows-yellow)
 
