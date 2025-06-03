@@ -1,4 +1,4 @@
-# Free Gito
+# Gito
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Build Status](https://img.shields.io/github/actions/workflow/status/Lynquity/free-gito/ci.yml?branch=main)](https://github.com/Lynquity/free-gito/actions)
