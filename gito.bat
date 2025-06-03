@@ -25,6 +25,11 @@ if "%1"=="--delete" (
 ) else if "%1"=="--help" (
     powershell -ExecutionPolicy Bypass -File "C:\Windows\System32\ELW\gito\help.ps1"
 ) else (
-    powershell -ExecutionPolicy Bypass -File "C:\Windows\System32\ELW\gito\checkversion.ps1"
-    C:\Windows\System32\ELW\gito\more.exe
+    if exist "%~dp0.gito/template.gito" (
+        powershell -ExecutionPolicy Bypass -File "C:\Windows\System32\ELW\gito\checkversion.ps1"
+        C:\Windows\System32\ELW\gito\template.exe
+    ) else (
+        powershell -ExecutionPolicy Bypass -File "C:\Windows\System32\ELW\gito\checkversion.ps1"
+        C:\Windows\System32\ELW\gito\more.exe
+    )
 )

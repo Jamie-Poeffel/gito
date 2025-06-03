@@ -34,4 +34,4 @@ if exist "C:\Windows\System32\gito.bat" (
 )
 
 :: Ruft die move.bat auf
-call "%~dp0move.bat"
+call "%~dp0register_gito.bat"
