@@ -34,9 +34,10 @@ jobs:
           git add program/version.json
           git commit -m "chore: bump version to $NEW_VERSION" || echo "No changes to commit"
           BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
-          git push https://x-access-token:${{ secrets.GH_PAT }}@github.com/Jamie-Poeffel/Gito.git "$BRANCH_NAME"
+          git push "https://x-access-token:${{ secrets.GH_PAT }}@github.com/Jamie-Poeffel/Gito.git" "$BRANCH_NAME"
         env:
           NEW_VERSION: ${{ env.NEW_VERSION }}
+
 
       - name: Get new version
         id: new_version
