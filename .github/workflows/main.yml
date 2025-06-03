@@ -44,7 +44,7 @@ jobs:
           
       - name: Create and merge pull request, delete branch
         run: |
-          gh pr create --fill --head version-bump --base main
+          gh pr create --title "chore: bump version to $NEW_VERSION" --body "Automated version bump" --head version-bump --base main
           gh pr merge --auto --squash --delete-branch
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
