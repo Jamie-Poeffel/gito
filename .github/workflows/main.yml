@@ -28,24 +28,31 @@ jobs:
           jq --arg v "$NEW_VERSION" '.version = $v' program/version.json > tmp.json && mv tmp.json program/version.json
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
 
-      - name: Push changes with PAT
+      - name: Generate GitHub App token
+        id: generate_token
+        uses: peter-murray/workflow-app-token-action@v2
+        with:
+          app_id: ${{ secrets.APP_ID }}
+          private_key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - name: Push changes with GitHub App token
         run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
+          git config user.name "gito-bot[bot]"
+          git config user.email "gito-bot[bot]@users.noreply.github.com"
           git add program/version.json
           git commit -m "chore: bump version to $NEW_VERSION [skip ci]" || echo "No changes to commit"
           git checkout -B version-bump
-          git remote set-url origin https://x-access-token:${{ secrets.GH_PAT }}@github.com/Jamie-Poeffel/Gito.git
+          git remote set-url origin https://x-access-token:${{ steps.generate_token.outputs.token }}@github.com/Jamie-Poeffel/Gito.git
           git push origin version-bump
-        env:
-          NEW_VERSION: ${{ env.NEW_VERSION }}
 
       - name: Create and merge pull request, delete branch
         run: |
+          gh auth setup-git
+          echo "${{ steps.generate_token.outputs.token }}" | gh auth login --with-token
           gh pr create --title "chore: bump version to $NEW_VERSION" --body "Automated version bump [skip ci]" --head version-bump --base main
-          gh pr merge --squash --delete-branch
+          gh pr merge --squash --delete-branch --admin
         env:
-          GH_TOKEN: ${{ secrets.GH_PAT }}
+          GH_TOKEN: ${{ steps.generate_token.outputs.token }}
           NEW_VERSION: ${{ env.NEW_VERSION }}
 
       - name: Get new version
