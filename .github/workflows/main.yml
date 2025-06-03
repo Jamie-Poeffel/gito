@@ -49,7 +49,11 @@ jobs:
         run: |
           echo "${{ steps.generate_token.outputs.token }}" | gh auth login --with-token
           gh auth setup-git
-          
+
+      - name: Fetch main branch
+        run: |
+          git fetch origin main
+
       - name: Create and merge pull request, delete branch
         run: |
           gh pr create --title "chore: bump version to $NEW_VERSION" --body "Automated version bump [skip ci]" --head version-bump --base main
