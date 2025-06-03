@@ -1,0 +1,59 @@
+name: main
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Get current version
+        id: get_version
+        run: |
+          VERSION=$(jq -r .version program/version.json)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          
+      - name: Bump patch version in version.json
+        run: |
+          OLD_VERSION=$(jq -r .version program/version.json)
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$OLD_VERSION"
+          NEW_VERSION="$MAJOR.$MINOR.$((PATCH + 1))"
+          jq --arg v "$NEW_VERSION" '.version = $v' program/version.json > tmp.json && mv tmp.json program/version.json
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add program/version.json
+          git commit -m "chore: bump version to $NEW_VERSION"
+          git push
+
+      - name: Get new version
+        id: new_version
+        run: |
+          NEW_VERSION=$(jq -r .version program/version.json)
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create zip of filtered source
+        run: |
+          mkdir -p filtered/program
+          
+          find program -type f \( -iname "*.exe" -o -iname "*.ps1" -o -iname "*.json" -o -iname "*.bat" \) -exec cp --parents {} filtered/ \;
+
+          find . -maxdepth 1 -type f -iname "*.bat" -exec cp {} filtered/ \;
+
+          cd filtered
+          zip -r ../source-${{ steps.new_version.outputs.new_version }}.zip .
+          cd ..
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: v${{ steps.new_version.outputs.new_version }}
+          tag_name: v${{ steps.new_version.outputs.new_version }}
+          files: source-${{ steps.new_version.outputs.new_version }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
