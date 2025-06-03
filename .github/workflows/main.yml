@@ -33,7 +33,7 @@ jobs:
         uses: peter-murray/workflow-application-token-action@v4.0.1
         with:
           app_id: ${{ secrets.APP_ID }}
-          private_key: ${{ secrets.APP_PRIVATE_KEY }}
+          application_private_key: ${{ secrets.APP_PRIVATE_KEY }}
 
       - name: Push changes with GitHub App token
         run: |
