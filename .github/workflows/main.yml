@@ -45,10 +45,13 @@ jobs:
           git remote set-url origin https://x-access-token:${{ steps.generate_token.outputs.token }}@github.com/Jamie-Poeffel/Gito.git
           git push origin version-bump
 
+      - name: Authenticate with GitHub App token
+        run: |
+          echo "${{ steps.generate_token.outputs.token }}" | gh auth login --with-token
+          gh auth setup-git
+          
       - name: Create and merge pull request, delete branch
         run: |
-          gh auth setup-git
-          echo "${{ steps.generate_token.outputs.token }}" | gh auth login --with-token
           gh pr create --title "chore: bump version to $NEW_VERSION" --body "Automated version bump [skip ci]" --head version-bump --base main
           gh pr merge --squash --delete-branch --admin
         env:
