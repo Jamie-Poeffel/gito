@@ -29,7 +29,9 @@ jobs:
           git config user.email "github-actions@github.com"
           git add program/version.json
           git commit -m "chore: bump version to $NEW_VERSION"
-          git push
+          
+          BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+          git push origin "$BRANCH_NAME"
 
       - name: Get new version
         id: new_version
