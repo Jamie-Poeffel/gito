@@ -10,12 +10,23 @@ if (Test-Path -Path $gitoFile) {
     Remove-Item -Path $gitoFile -Force
     if (-not (Test-Path -Path $gitoFile)) {
         Write-Output "Die Datei 'gito.bat' wurde erfolgreich gelöscht!"
-    } else {
+    }
+    else {
         Write-Output "Fehler beim Löschen der Datei 'gito.bat'."
     }
-} else {
+}
+else {
     Write-Output "Die Datei 'gito.bat' existiert nicht in 'C:\Windows\System32'."
 }
+
+Write-Host "Unregistering .gito file extension..."
+
+Remove-Item -Path "Registry::HKEY_CLASSES_ROOT\.gito" -ErrorAction SilentlyContinue
+
+Remove-Item -Path "Registry::HKEY_CLASSES_ROOT\GITO.File" -Recurse -ErrorAction SilentlyContinue
+
+Write-Host "Done. You may need to restart Explorer or log off/on for changes to take effect."
+
 
 $destinationDir = "C:\Windows\System32\ELW\gito"
 if (Test-Path -Path $destinationDir) {
@@ -23,10 +34,12 @@ if (Test-Path -Path $destinationDir) {
     Remove-Item -Path $destinationDir -Recurse -Force
     if (-not (Test-Path -Path $destinationDir)) {
         Write-Output "Das Verzeichnis '$destinationDir' wurde erfolgreich gelöscht!"
-    } else {
+    }
+    else {
         Write-Output "Fehler beim Löschen des Verzeichnisses '$destinationDir'."
     }
-} else {
+}
+else {
     Write-Output "Das Verzeichnis '$destinationDir' existiert nicht."
 }
 
