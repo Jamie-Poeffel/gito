@@ -7,6 +7,7 @@ on:
 
 jobs:
   release:
+    if: github.actor != 'github-actions'
     runs-on: ubuntu-latest
 
     steps:
@@ -18,7 +19,7 @@ jobs:
         run: |
           VERSION=$(jq -r .version program/version.json)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-          
+
       - name: Bump patch version in version.json
         run: |
           OLD_VERSION=$(jq -r .version program/version.json)
@@ -32,13 +33,20 @@ jobs:
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git add program/version.json
-          git commit -m "chore: bump version to $NEW_VERSION" || echo "No changes to commit"
-          git checkout -b version-bump
-          git push "https://x-access-token:${{ secrets.GH_PAT }}@github.com/Jamie-Poeffel/Gito.git" version-bump
-
+          git commit -m "chore: bump version to $NEW_VERSION [skip ci]" || echo "No changes to commit"
+          git checkout -B version-bump
+          git remote set-url origin https://x-access-token:${{ secrets.GH_PAT }}@github.com/Jamie-Poeffel/Gito.git
+          git push origin version-bump
         env:
           NEW_VERSION: ${{ env.NEW_VERSION }}
 
+      - name: Create and merge pull request, delete branch
+        run: |
+          gh pr create --title "chore: bump version to $NEW_VERSION" --body "Automated version bump [skip ci]" --head version-bump --base main
+          gh pr merge --squash --delete-branch
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+          NEW_VERSION: ${{ env.NEW_VERSION }}
 
       - name: Get new version
         id: new_version
@@ -49,11 +57,8 @@ jobs:
       - name: Create zip of filtered source
         run: |
           mkdir -p filtered/program
-          
           find program -type f \( -iname "*.exe" -o -iname "*.ps1" -o -iname "*.json" -o -iname "*.bat" \) -exec cp --parents {} filtered/ \;
-
           find . -maxdepth 1 -type f -iname "*.bat" -exec cp {} filtered/ \;
-
           cd filtered
           zip -r ../source-${{ steps.new_version.outputs.new_version }}.zip .
           cd ..
