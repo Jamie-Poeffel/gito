@@ -39,13 +39,7 @@ jobs:
 
         env:
           NEW_VERSION: ${{ env.NEW_VERSION }}
-
-
-      - name: Set up GitHub CLI
-        uses: cli/cli@v3
-        with:
-          token: ${{ secrets.GH_PAT }}
-      
+          
       - name: Create and merge pull request, delete branch
         run: |
           gh pr create --title "chore: bump version to $NEW_VERSION" --body "Automated version bump" --head version-bump --base main
