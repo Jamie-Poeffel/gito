@@ -29,8 +29,6 @@ IF %ERRORLEVEL% EQU 0 (
     echo .yaml not registered. Skipping icon copy.
 )
 
-:: Optional: set default open command (e.g., Notepad)
-:: Replace path if you want to use VS Code
 reg add "HKCR\GITO.File\shell\open\command" /ve /d "\"%LocalAppData%\Programs\Microsoft VS Code\Code.exe\" \"%%1\"" /f
 
 echo Done. You may need to restart Explorer for changes to take effect.

@@ -1,19 +1,41 @@
 from gitoparser import parse_gito_file
 import os
+import subprocess
+import sys
 
 def main():
     template_file = os.path.join(os.getcwd(), ".gito", "template.gito")
 
+    if not os.path.exists(template_file):
+        subprocess.run(["more.exe"])
+        sys.exit(10)
+
     with open(template_file, "r", encoding="utf-8") as f:
         parsed = parse_gito_file(f.readlines())
     
-    answers = {}
-    for quest in parsed["questions"]:
-        answer = ask(quest)
-        if answer["id"]: 
-            answers[answer["id"]] = answer["answer"]
+    try:
+
+        answers = {}
+        for quest in parsed["questions"]:
+            answer = ask(quest)
+            if answer["id"]: 
+                answers[answer["id"]] = answer["answer"]
+        
+        commit_message = build(parsed["build"], answers)
+
+    except KeyboardInterrupt:
+        print("\nCommit aborted.")
+        sys.exit(1)
+
+    print(commit_message)
     
-    print(build(parsed["build"], answers))
+    confirmation = input("\nDo you want to commit with this message? [c]: ").strip().lower()
+    if confirmation == 'c':
+        subprocess.run(["git", "commit", "-m", commit_message])
+        print("Commit created!")
+    else:
+        print("Commit aborted.")
+    
 
 def ask(question):
     answer = {}
