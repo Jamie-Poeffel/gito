@@ -9,7 +9,7 @@ if ([string]::IsNullOrWhiteSpace($Path)) {
     $Path = Get-Location
 }
 
-$DEFAULT_TEMPLATE = "https://raw.githubusercontent.com/Jamie-Poeffel/Gito/refs/heads/main/templates/template.gito"
+$DEFAULT_TEMPLATE = "https://raw.githubusercontent.com/Jamie-Poeffel/Gito/refs/heads/main/template/template.gito"
 
 Write-Host "Select template type:"
 Write-Host "1. Empty"
