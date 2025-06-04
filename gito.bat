@@ -3,10 +3,18 @@
 if "%1"=="--delete" (
     powershell -ExecutionPolicy Bypass -File "C:\Windows\System32\ELW\gito\uninstall.ps1"
 ) else if "%1"=="init" (
-    if "%2"=="-y" (
-        powershell -ExecutionPolicy Bypass -File "C:\Windows\System32\ELW\gito\init.ps1" -d "true"
+    if "%2"=="template" (
+        if "%3"=="-y" (
+            powershell -ExecutionPolicy Bypass -File "C:\Windows\System32\ELW\gito\templateinit.ps1" -d "true"
+        ) else (
+            powershell -ExecutionPolicy Bypass -File "C:\Windows\System32\ELW\gito\templateinit.ps1"
+        )
     ) else (
-        powershell -ExecutionPolicy Bypass -File "C:\Windows\System32\ELW\gito\init.ps1"
+        if "%2"=="-y" (
+            powershell -ExecutionPolicy Bypass -File "C:\Windows\System32\ELW\gito\init.ps1" -d "true"
+        ) else (
+            powershell -ExecutionPolicy Bypass -File "C:\Windows\System32\ELW\gito\init.ps1"
+        )
     )
 ) else if "%1"=="-v" (
     powershell -ExecutionPolicy Bypass -File "C:\Windows\System32\ELW\gito\version.ps1"
