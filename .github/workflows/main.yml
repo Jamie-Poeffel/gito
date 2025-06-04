@@ -7,7 +7,9 @@ on:
 
 jobs:
   release:
-    if: github.actor != 'github-actions' && !(github.event.pull_request.title =~ '\\[skip cli\\]' && github.actor == 'Jamie-Poeffel')
+    if: github.actor != 'github-actions' &&
+        github.actor != 'gito-bot[bot]' &&
+        !(github.actor == 'Jamie-Poeffel' && contains(github.event.pull_request.title, '[skip cli]'))
     runs-on: ubuntu-latest
 
     steps:
