@@ -1,23 +1,25 @@
 # Path to the JSON file
 $version_file = "C:\Windows\System32\ELW\gito\version.json"
 
-# Read the local JSON file and convert it to a PowerShell object
-$version = Get-Content -Path $version_file -Raw | ConvertFrom-Json
+# Read the local JSON file and extract the version
+$vers = (Get-Content $version_file | ConvertFrom-Json).version.Trim()
 
 # Define the URL of the online JSON file
-$jsonUrl = 'https://raw.githubusercontent.com/Lynquity/free-gito/main/program/version.json'
+$jsonUrl = "https://raw.githubusercontent.com/Jamie-Poeffel/gito/main/program/version.json"
 
 # Fetch online version JSON data
-$vers = $version.version.Trim()  # Trim any spaces
+try {
+    $response = Invoke-RestMethod -Uri $jsonUrl
+    $onvers = $response.version.Trim()
+}
+catch {
+    Write-Host "Failed to fetch online version."
+    exit 1
+}
 
 Write-Host "gito $vers"
-# Display the local version
-$online_version = Invoke-RestMethod -Uri $jsonUrl -Method Get
 
-# Extract version numbers
-$onvers = $online_version.version.Trim()  # Trim any spaces
-
-# Compare versions correctly
-if ($vers -ne $onvers) {
-    Write-Warning "Update to new Version $onvers with command: gito -u / gito --update / elx i"
+# Compare versions only if $onvers is set
+if ($null -ne $onvers -and $vers -ne $onvers) {
+    Write-Host "Update to new Version $onvers with command: gito -u / gito --update / elx i"
 }
