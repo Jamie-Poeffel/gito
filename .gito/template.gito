@@ -24,7 +24,7 @@ TYPE: string
 ID: summary
 
 QUESTION: "Issue or PR number (optional, e.g., #123)"
-TYPE: number
+TYPE: string
 OPTIONAL: True
 ID: issue
 INCLUDES: brackets
