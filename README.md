@@ -61,17 +61,14 @@
 <pre><code class="language-sh">❯ cd gito
 </code></pre>
 </li>
-<li class="my-0">
-<p><strong>Install the dependencies:</strong></p>
-</li>
 </ol>
-<p>echo 'INSERT-INSTALL-COMMAND-HERE'</p>
 <h3>Usage</h3>
-<p>Run the project with:</p>
-<p>echo 'INSERT-RUN-COMMAND-HERE'</p>
-<h3>Testing</h3>
-<p>Gito uses the {<strong>test_framework</strong>} test framework. Run the test suite with:</p>
-<p>echo 'INSERT-TEST-COMMAND-HERE'</p>
+<p>With gito init you can add gito to a new project and configurate it in your own way</p>
+<pre><code class="language-sh">> gito init (-y)</code></pre>
+<p>With gito init template you can install a pre defined template</p>
+<pre><code class="language-sh">> gito init template</code></pre>
+<p>With gito you can run a new commit message based on your template or your settings</p>
+<pre><code class="language-sh">> gito </code></pre>
 <hr>
 <div align="left" class=""><a href="#top">⬆ Return</a></div>
 <hr></div>
