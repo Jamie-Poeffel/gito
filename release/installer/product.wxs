@@ -11,7 +11,7 @@
     Compressed="yes">
 
     <MajorUpgrade DowngradeErrorMessage="A newer version is already installed." />
-    <MediaTemplate />
+    <Media Id="1" Cabinet="product.cab" EmbedCab="yes" />
 
     <StandardDirectory Id="ProgramFilesFolder">
       <Directory Id="INSTALLFOLDER" Name="Gito">
