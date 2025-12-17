@@ -6,6 +6,7 @@ run:
 
 build:
 	cargo build --release
+	copy target\release\gito.exe release\gito.exe
 
 clean:
 	cargo clean
