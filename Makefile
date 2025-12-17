@@ -10,3 +10,7 @@ build:
 
 clean:
 	cargo clean
+
+msi:
+	wix build release\installer\product.wxs -o release\gito.msi
+
