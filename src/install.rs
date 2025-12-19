@@ -1,43 +1,61 @@
 use std::fs::File;
-use std::io::Write;
-use std::error::Error;
+use std::io::{Read, Write};
 use std::env;
 use std::fs;
 use std::path::PathBuf;
+use indicatif::{ProgressBar, ProgressStyle};
 
 const TEMPLATE_URL: &str = "https://raw.githubusercontent.com/Jamie-Poeffel/gito/refs/heads/main/templates";
 const TEMPLATE_FILE: &str = "template.gito";
 
 
 pub fn install_with_cached_template(template_name: &str) {
-    println!("Installing {}", template_name);
-
     let template_url = format!("{}/{}/{}", TEMPLATE_URL, template_name, TEMPLATE_FILE);
 
-    println!("template_url {}", template_url);
-
-    let _ = download_template(&template_url, TEMPLATE_FILE);   
-    
-    
+    let _ = download_with_progress(&template_url, TEMPLATE_FILE);   
 }
 
-fn download_template(template_url: &str, output_file: &str) -> Result<(), Box<dyn Error>> {
+fn download_with_progress(
+    url: &str,
+    output_file: &str,
+) -> Result<(), Box<dyn std::error::Error>> {    
     let dir = templates_dir()?;
     let path = dir.join(output_file);
-    
-    let response = reqwest::blocking::get(template_url)?;
+    let mut response = reqwest::blocking::get(url)?;
 
-    if !response.status().is_success() {
-        return Err(format!("Download failed: {}", response.status()).into());
-    }
+    let total_size = response
+        .content_length()
+        .ok_or("Failed to get content length")?;
 
-    let bytes = response.bytes()?;
+    let pb = ProgressBar::new(total_size);
+
+    pb.set_style(
+        ProgressStyle::with_template(
+            "[{elapsed_precise}] [{bar:40.cyan/blue}] \
+             {bytes}/{total_bytes} ({bytes_per_sec}, ETA {eta})",
+        )?
+        .progress_chars("#>-"),
+    );
+
 
     let mut file = File::create(path)?;
-    file.write_all(&bytes)?;
+    let mut downloaded: u64 = 0;
+    let mut buffer = [0; 8192];
 
+    loop {
+        let n = response.read(&mut buffer)?;
+        if n == 0 {
+            break;
+        }
+        file.write_all(&buffer[..n])?;
+        downloaded += n as u64;
+        pb.set_position(downloaded);
+    }
+
+    pb.finish_with_message("Download complete");
     Ok(())
 }
+
 
 
 fn templates_dir() -> Result<PathBuf, Box<dyn std::error::Error>> {

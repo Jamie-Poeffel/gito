@@ -3,6 +3,7 @@ mod parse_utils;
 mod template_utils;
 mod structs;
 mod install;
+mod reuse_history;
 
 use clap::Parser;
 use std::path::Path;
@@ -12,6 +13,7 @@ use file_utils::read_template_file;
 use std::io::{self, Write};
 use parse_utils::parse_template;
 use structs::{Question, QuestionType};
+use reuse_history::{get_history_file_path, append_to_history};
 use std::collections::HashMap;
 use regex::Regex;
 use crate::structs::Includes;
@@ -41,6 +43,9 @@ enum Commands {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let mut rl = rustyline::DefaultEditor::new()?;
+    let history_path = get_history_file_path();
+
     let args = Args::parse();
 
     if args.verbose {
@@ -90,7 +95,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let questions = template.questions;
 
     for question in questions.iter() {
-        let answer = ask_question(question)?;
+        let answer = ask_question(question, &mut rl)?;
         answers.insert(question.id.clone(), answer);
     }
 
@@ -134,6 +139,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!("Commit cancelled.");
     }
 
+    if let Some(ref path) = history_path {
+        let _ = rl.save_history(path);
+    }
+
     Ok(())
 }
 
@@ -167,7 +176,20 @@ pub fn render_build(build: &str, answers: &HashMap<String, String>, questions: &
 }
 
 
-fn ask_question(q: &Question) -> Result<String, Box<dyn std::error::Error>> {
+fn ask_question(q: &Question, rl: &mut rustyline::DefaultEditor) -> Result<String, Box<dyn std::error::Error>> {
+    let history_path = get_history_file_path();
+
+    if q.id == "summary" {
+        if let Some(ref path) = history_path {
+            if path.exists() {
+                // Load history so Arrow Up works
+                let _ = rl.load_history(path); 
+            }
+        }
+    } else {
+        rl.clear_history()?;
+    }
+
     loop {
         let prompt = if let Some(options) = &q.options {
             let options_str: Vec<String> = options.iter()
@@ -177,48 +199,59 @@ fn ask_question(q: &Question) -> Result<String, Box<dyn std::error::Error>> {
                     } else { opt.clone() }
                 })
                 .collect();
-
             format!("{} ({}): ", q.text, options_str.join(", "))
         } else {
             format!("{}: ", q.text)
         };
 
+        let readline = rl.readline(&prompt);
+        
+        match readline {
+            Ok(line) => {
+                let input = line.trim();
 
-        print!("{}", prompt);
-        io::stdout().flush()?;
-
-        let mut input = String::new();
-        io::stdin().read_line(&mut input)?;
-        let input = input.trim();
-
-        if input.is_empty() {
-            if let Some(default) = &q.default {
-                return Ok(default.clone());
-            }
-            if q.optional {
-                return Ok(String::new());
-            }
-            println!("This field is required.");
-            continue;
-        }
-
-        if let Some(options) = &q.options {
-            if !options.contains(&input.to_string()) {
-                println!("Allowed values: {:?}", options);
-                continue;
-            }
-        }
-
-        match q.kind {
-            QuestionType::Number => {
-                if input.parse::<u64>().is_err() {
-                    println!("Must be a number");
+                if input.is_empty() {
+                    if let Some(default) = &q.default {
+                        return Ok(default.clone());
+                    }
+                    if q.optional {
+                        return Ok(String::new());
+                    }
+                    println!("This field is required.");
                     continue;
                 }
-            }
-            _ => {}
-        }
 
-        return Ok(input.to_string());
+                if q.id == "summary" {
+                    let _ = rl.add_history_entry(input);
+                    let _ = append_to_history(input);
+                }
+
+                if let Some(options) = &q.options {
+                    if !options.contains(&input.to_string()) {
+                        println!("Allowed values: {:?}", options);
+                        continue;
+                    }
+                }
+
+                match q.kind {
+                    QuestionType::Number => {
+                        if input.parse::<u64>().is_err() {
+                            println!("Must be a number");
+                            continue;
+                        }
+                    }
+                    _ => {}
+                }
+
+                return Ok(input.to_string());
+            },
+            Err(rustyline::error::ReadlineError::Interrupted) => {
+                return Err("CTRL-C pressed".into());
+            },
+            Err(rustyline::error::ReadlineError::Eof) => {
+                return Err("CTRL-D pressed".into());
+            },
+            Err(err) => return Err(err.into()),
+        }
     }
 }
