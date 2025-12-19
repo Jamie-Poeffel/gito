@@ -2,9 +2,11 @@ mod file_utils;
 mod parse_utils;
 mod template_utils;
 mod structs;
+mod install;
 
 use clap::Parser;
 use std::path::Path;
+use install::install_with_cached_template;
 
 use file_utils::read_template_file;
 use std::io::{self, Write};
@@ -14,6 +16,7 @@ use std::collections::HashMap;
 use regex::Regex;
 use crate::structs::Includes;
 use std::process::Command;
+use clap::Subcommand;
 
 #[derive(Parser)]
 #[command(name = "gito")]
@@ -24,6 +27,17 @@ struct Args {
 
     #[arg(long)]
     template: bool,
+
+    
+    #[command(subcommand)]
+    command: Option<Commands>,
+}
+
+#[derive(Subcommand)]
+enum Commands {
+    Install {
+        name: String,
+    },
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -47,6 +61,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
 
         return Ok(());
+    }
+
+    match args.command {
+        Some(Commands::Install { name }) => {
+            install_with_cached_template(&name);
+
+            return Ok(());
+        }
+        None => {
+            println!("")
+        }
     }
 
     // --- NORMAL MODE ---
